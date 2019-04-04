@@ -76,6 +76,58 @@ namespace RoR2ML.Installer {
         }
 
         /// <summary>
+        /// Patches an assembly located in Managed.
+        /// </summary>
+        /// <param name="pathToPatch"></param>
+        /// <param name="assemblyName"></param>
+        public void PatchAssembly(string pathToPatch, string assemblyName, string[] dependencies) {
+
+            string assemblyPath = FindAssemblyByName( assemblyName );
+            if( assemblyPath == string.Empty )
+                return;
+
+            string outputPath = Path.Combine( Directory.GetParent( assemblyPath ).FullName, Path.GetFileNameWithoutExtension( assemblyPath ) + "-NEW.dll" );
+
+            Console.WriteLine( assemblyPath );
+            Console.WriteLine( outputPath );
+
+            using( MonoModder mm = new MonoModder() {
+                InputPath = assemblyPath,
+                OutputPath = outputPath
+            } ) {
+                mm.LogVerboseEnabled = true;
+                mm.Read();
+                //Force everything to be public
+                mm.PublicEverything = true;
+
+                //Read in the patch
+                mm.ReadMod( pathToPatch );
+
+                mm.MapDependencies();
+                mm.DependencyDirs.Add( Directory.GetParent( Assembly.GetExecutingAssembly().FullName ).FullName );
+
+                mm.AutoPatch();
+
+                mm.Write();
+            }
+
+            File.Delete( assemblyPath );
+            File.Copy( outputPath, assemblyPath );
+            File.Delete( outputPath );
+
+            string managedPath = Directory.GetParent( assemblyPath ).FullName;
+
+            foreach(string s in dependencies ) {
+                string dependencyDestination = Path.Combine(managedPath, Path.GetFileName(s));
+
+                if( File.Exists( dependencyDestination ) )
+                    File.Delete( dependencyDestination );
+                File.Copy( s, dependencyDestination );
+            }
+
+        }
+
+        /// <summary>
         /// Runs HookGen on an assembly located in Managed
         /// </summary>
         /// <param name="assemblyName"></param>
@@ -112,6 +164,25 @@ namespace RoR2ML.Installer {
                     gen.Generate();
                     mOut.Write( hooksPath );
                 }
+            }
+
+            string managedPath = Directory.GetParent( assemblyPath ).FullName;
+            string currentDirectory = Directory.GetParent( Assembly.GetExecutingAssembly().FullName ).FullName;
+
+            string[] filesToCopy = new string[] {
+                "MonoMod.dll",
+                "MonoMod.RuntimeDetour.dll",
+                "MonoMod.Utils.dll",
+            };
+
+            foreach(string s in filesToCopy ) {
+                string fromPath = Path.Combine( currentDirectory, s );
+                string toPath = Path.Combine( managedPath, s );
+
+                if( File.Exists( fromPath ) )
+                    File.Delete( fromPath );
+
+                File.Copy(fromPath, toPath);
             }
 
         }

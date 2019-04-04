@@ -1,12 +1,15 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp2.1</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\RoR2MLEntryPointPatch\RoR2MLEntryPointPatch.csproj" />
     <ProjectReference Include="..\RoR2MLUtils\RoR2MLLauncherUtils.csproj" />
+    <ProjectReference Include="..\Thundercell\Thundercell.csproj" />
   </ItemGroup>
 
 </Project>
