@@ -19,6 +19,8 @@ namespace Thundercell {
         public ThunderCell() {
             //Create mod manager
             modManager = new ThundercellModManager();
+
+
         }
 
     }

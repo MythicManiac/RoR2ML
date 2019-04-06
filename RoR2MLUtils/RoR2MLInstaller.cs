@@ -11,7 +11,7 @@ namespace RoR2ML.Installer {
 
         #region Components
         public MonoModHelper monomodHelper;
-        public BackupManager backupManager;
+        public FileSwapManager swapManager;
         #endregion
 
         #region Paths
@@ -24,7 +24,7 @@ namespace RoR2ML.Installer {
 
         public RoR2MLInstaller() {
             monomodHelper = new MonoModHelper( this );
-            backupManager = new BackupManager( this );
+            swapManager = new FileSwapManager( this );
         }
 
         //Sets the path for the game
@@ -44,20 +44,13 @@ namespace RoR2ML.Installer {
             if( currentGamePath == string.Empty )
                 return;
 
-            if( restoreOrMakeBackup ) {
-                backupManager.RestoreOrCreateBackup( currentBackupSlot );
-            }
-
             monomodHelper.PatchAssembly( pathToPatch, assemblyToPatch );
         }
         public void InstallPatch(string pathToPatch, string[] dependencies, string assemblyToPatch = "Assembly-CSharp.dll", bool restoreOrMakeBackup = true) {
             if( currentGamePath == string.Empty )
                 return;
 
-            if( restoreOrMakeBackup ) {
-                backupManager.RestoreOrCreateBackup( currentBackupSlot );
-            }
-
+            swapManager.SwapFiles(true);
             monomodHelper.PatchAssembly( pathToPatch, assemblyToPatch, dependencies );
         }
 
